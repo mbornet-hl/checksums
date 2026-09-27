@@ -10,7 +10,7 @@ Only **root** is allowed to access **trusted xattr** but the capability
 
 
 ``` bash
-./checksums -h
+$ ./checksums -h
 ./checksums : version 1.49
 Usage : ./checksums [-hvDNfM25rsdOCmnulL][-w width] pathname [pathname ...]
   -h : help
