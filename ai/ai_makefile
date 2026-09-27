@@ -1,0 +1,41 @@
+#
+#	Makefile for module AI
+#	~~~~~~~~~~~~~~~~~~~~~~
+#
+#	@(#)	[Zen] ai_makefile	Version 1.5 du 26/09/22 - 
+#
+
+LIB		= lib
+OBJ_C	= $(LIB)(ai_gpri.o)         \
+            $(LIB)(ai_xattr.o)        \
+		  $(LIB)(ai_checksums.o)
+
+OBJ_LIB	= $(OBJ_C)
+
+all		: $(LIB)
+
+$(LIB)	: $(OBJ_LIB)
+		@ ar rvU $(LIB) $?
+		@ rm $?
+
+# Dependencies list
+# ~~~~~~~~~~~~~~~~~
+
+$(LIB)(ai_checksums.o):     ../gnulib/lib/md5.h             \
+                            ../gnulib/lib/sha256.h          \
+                            ../gnulib/lib/sha512.h          \
+                            ai_cpri.h                       \
+                            ai_epri.h                
+
+$(LIB)(ai_gpri.o):          ../gnulib/lib/md5.h             \
+                            ../gnulib/lib/sha256.h          \
+                            ../gnulib/lib/sha512.h          \
+                            ai_cpri.h                       \
+                            ai_epri.h                
+
+$(LIB)(ai_xattr.o):         ../gnulib-build/config.h        \
+                            ../gnulib/lib/md5.h             \
+                            ../gnulib/lib/sha256.h          \
+                            ../gnulib/lib/sha512.h          \
+                            ai_cpri.h                       \
+                            ai_epri.h                

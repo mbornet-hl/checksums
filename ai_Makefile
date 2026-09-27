@@ -1,0 +1,60 @@
+#
+#	Makefile for the generation of the "checksums" command
+#	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#	@(#)	[Zen] ai_Makefile	Version 1.7 du 26/09/26 - 
+#
+
+MODULE		= ai
+TARGET		= checksums
+TARGET_o		= $(MODULE)_$(TARGET).o
+TARGET_c		= $(MODULE)_$(TARGET).c
+
+# --- Gnulib setup ---
+GNULIB_SRC	= gnulib
+GNULIB_BUILD	= gnulib-build
+GNULIB_LIB	= $(GNULIB_BUILD)/gllib/libgnu.a
+GNULIB_MODULES = crypto/md5 crypto/sha256 crypto/sha512
+
+# --- Compiler and linker flags ---
+CC			= gcc
+CFLAGS		+= -I$(GNULIB_BUILD) -I$(GNULIB_BUILD)/gllib -include $(GNULIB_BUILD)/config.h
+LDLIBS		+= $(GNULIB_LIB)
+LIBS			+= -lcap -pthread
+
+LIBS			+= $(MODULE)/lib
+LIBS			+= -lcap
+
+# --- Build rules ---
+all			: $(TARGET)
+
+$(GNULIB_LIB)	:
+			echo "Making $(GNULIB_LIB) ..."
+			@if [ ! -d "$(GNULIB_SRC)" ]; then \
+				echo "Retrieving GNUlib ..." ; \
+				git clone --depth 1 https://git.savannah.gnu.org/git/gnulib.git $(GNULIB_SRC); \
+			fi
+			@if [ ! -f "$(GNULIB_BUILD)/configure" ]; then \
+				./$(GNULIB_SRC)/gnulib-tool --create-testdir --dir=$(GNULIB_BUILD) $(GNULIB_MODULES); \
+			fi
+			cd $(GNULIB_BUILD) && ./configure && $(MAKE)
+
+$(MODULE)/lib	: $(GNULIB_LIB)
+			cd $(MODULE); make -f $(MODULE)_makefile
+
+$(TARGET)		: $(TARGET_o) $(GNULIB_LIB)
+			ar x ai/lib $(TARGET_o)
+			$(CC) $(CFLAGS) $(TARGET_o) -o $(TARGET) $(LIBS) $(LDLIBS)
+			./$(TARGET) -h
+
+$(TARGET_o)	: $(MODULE)/lib $(GNULIB_LIB)
+
+clean		:
+			rm -f *.o $(TARGET)
+			if [ -d "$(GNULIB_BUILD)" ]; then $(MAKE) -C $(GNULIB_BUILD) clean; fi
+
+clean_all		: clean
+			  rm -rf $(MODULE) $(GNULIB_SRC) $(GNULIB_BUILD)
+			  rm -f Makefile $(MODULE)_Makefile
+
+.PHONY		: all clean
