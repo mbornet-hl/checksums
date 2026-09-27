@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+#	Creation of the "checksums" command
+#	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#	This script create the development environment, then compiles
+#	everything in order to produce the "checksums" command.
+#
+#	@(#)	[Zen] ai_mk_chksums	Version 1.1 du 26/09/23 - 
+#
+
+ref_get ai_Makefile
+ln -s ai_Makefile Makefile
+
+mkdir ai
+cd ai
+	ref_get ai_{cpri.h,epri.h,gpri.c,checksums.c,xattr.c}
+	ref_get ai_makefile
+cd ..
+
+make
