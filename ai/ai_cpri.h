@@ -2,7 +2,7 @@
  *  Various definitions, types, ... for checksums in xattr
  *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- *  @(#) [Zen] ai_cpri.h   Version 1.15 du 26/09/26 - 
+ *  @(#) [Zen] ai_cpri.h   Version 1.16 du 26/09/26 - 
  *
  *  vim: ts=4 sw=4 et foldmethod=marker :
  *
@@ -25,7 +25,7 @@
 #define _AI_CPRI_H
 
 #if defined(AI_RSYNC)
-#include "ai_wrapper.h""
+#include "ai_wrapper.h"
 #endif /* AI_RSYNC */
 
 /* Definitions {{{ */
