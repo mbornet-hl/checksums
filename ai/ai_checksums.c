@@ -2,7 +2,7 @@
  *  Simultaneous computation of MD5, SHA256 and SHA512 checksums of a file
  *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- *  @(#) [Zen] ai_checksums.c   Version 1.49 du 26/09/22 - 
+ *  @(#) [Zen] ai_checksums.c   Version 1.50 du 26/09/29 - 
  *
  *  vim: ts=4 sw=4 et foldmethod=marker :
  *
@@ -43,7 +43,7 @@
 /* Includes }}} */
 
 /* Version of the program */
-#define AI_VERSION              ("1.49")
+#define AI_VERSION              ("1.50")
 
 /* ai_max() {{{ */
 
@@ -118,7 +118,7 @@ void usage()
     fprintf(stderr, "  -C : list files that needs checksum computation\n");
     fprintf(stderr, "  -n : list files that have no checksums in xattr\n");
     fprintf(stderr, "  -m : list files that have missing checksums in xattr\n");
-    fprintf(stderr, "  -u : list files that have chekcsums in xattr but need updates\n");
+    fprintf(stderr, "  -u : list files that have checksums in xattr but need updates\n");
     fprintf(stderr, "  -l : list xattr checksums status\n");
     fprintf(stderr, "  -L : legacy display format\n");
     fprintf(stderr, "  -w : pathname width\n");
