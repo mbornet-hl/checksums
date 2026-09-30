@@ -2,7 +2,7 @@
  *  Simultaneous computation of MD5, SHA256 and SHA512 checksums of a file
  *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- *  @(#) [Zen] ai_checksums.c   Version 1.50 du 26/09/29 - 
+ *  @(#) [Zen] ai_checksums.c   Version 1.51 du 26/09/30 - 
  *
  *  vim: ts=4 sw=4 et foldmethod=marker :
  *
@@ -43,7 +43,7 @@
 /* Includes }}} */
 
 /* Version of the program */
-#define AI_VERSION              ("1.50")
+#define AI_VERSION              ("1.51")
 
 /* ai_max() {{{ */
 
@@ -469,9 +469,11 @@ int main(int argc, char *argv[])
         }
     }
 
+#if 0
     if (G.list) {
         fprintf(stderr, "*** %s: list only => no xattr have been updated.\n", G.progname);
     }
+#endif
 
     return EXIT_SUCCESS;
 }

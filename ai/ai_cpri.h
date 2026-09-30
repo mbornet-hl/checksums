@@ -2,7 +2,7 @@
  *  Various definitions, types, ... for checksums in xattr
  *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- *  @(#) [Zen] ai_cpri.h   Version 1.16 du 26/09/26 - 
+ *   @(#) [Zen] ai_cpri.h   Version 1.17 du 26/09/28 - 
  *
  *  vim: ts=4 sw=4 et foldmethod=marker :
  *
@@ -34,7 +34,7 @@
 #define FALSE                   (0)
 #endif
 
-#if! defined(TRUE)
+#if ! defined(TRUE)
 #define TRUE                    (1)
 #endif
 
@@ -81,10 +81,10 @@
 #define AI_EXIT_ERR_STAT        (3)
 
 /* For debugging purposes */
-#define X                       if (G.debug) {\
+#define AI_X                    if (G.debug) {\
                                     fprintf(stderr, "%s(%3d) : %s()\n", __FILE__, __LINE__, __func__); \
                                 }
-#define Z                       { fprintf(stderr, "%s(%d) [%s()]\n", __FILE__, __LINE__, __func__); }
+#define AI_Z                    { fprintf(stderr, "%s(%d) [%s()]\n", __FILE__, __LINE__, __func__); }
 
 
 /* Namespace of the xattr */
