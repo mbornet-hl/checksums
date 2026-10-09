@@ -2,6 +2,12 @@
 This command computes **MD5**, **SHA256** and **SHA512** checksums and stores
 them in **trusted extended attributes**.
 
+## Compilation
+To compile **checksums** from the source files, type :
+``` bash
+$ make
+```
+
 Only **root** is allowed to access **trusted xattr** but the capability
 **CAP_SYS_ADMIN** may be added to this program with the command :
 ``` bash
