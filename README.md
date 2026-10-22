@@ -22,7 +22,7 @@ These checksums are computed simultaneously using threads and CPU affinity.
 - list files that have no checksums in extended attributes
 - list files that have all checksums in extended attributes
 - list files that have obsolete checksums in extended attributes
-- display checksums in a format compatible with md5sum, sha256sum or sha512sum
+- display output in a format compatible with md5sum, sha256sum or sha512sum
 - ...
 
 
