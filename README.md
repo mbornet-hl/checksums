@@ -51,3 +51,34 @@ Usage : checksums [-hvDNfM25rsdOCmnulL][-w width] pathname [pathname ...]
   -w : pathname width
 
 ```
+
+The **hl** colorization configuration for **checksums** is available in the **hl** project
+(https://github.com/mbornet-hl/hl).
+
+It may look like this one :
+```bash
+$ hl -vop checksums
+# /DATA3/projets/hl/config_files/hl_sums.cfg
+checksums                                                    :
+      -e
+      -3c   '(trusted\.((md5|sha256|sha512)_sum|date))'
+      -3g   'timestamps are consistent'
+      -3g   'checksums are retrieved from xattr'
+      -3y   'checksums are computed'
+      -3g   'all checksums are in xattr'
+      -3g   'tag \[.*\] found in xattr'
+      -3y   'timestamps are NOT CONSISTENT.*'
+      -3y   '....-..-.. ..:..:.. \(xattr\) != ....-..-.. ..:..:.. \(ctime\)'
+      -3y   'xattr need update'
+      -3r   'no checksums in xattr'
+      -3r   'tag \[.*\] NOT FOUND in xattr'
+      -3w   '.*\[DEBUG\].*'
+      -3g   '.*: all xattr are OK'
+      -3m   '.*: missing checksums in xattr'
+      -3y   '.*: needs timestamp update'
+      -3r   '.*: no checksums in xattr'
+      -3y   '\<[0-9a-f]{32}\>'
+      -3g   '\<[0-9a-f]{64}\>'
+      -3c   '\<[0-9a-f]{128}\>'
+
+```
