@@ -2,7 +2,7 @@
  *  Simultaneous computation of MD5, SHA256 and SHA512 checksums of a file
  *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- *  @(#) [Zen] ai_xattr.c   Version 1.14 du 26/09/26 - 
+ *  @(#) [Zen] ai_xattr.c   Version 1.16 du 26/10/22 - 
  *
  *  vim: ts=4 sw=4 et foldmethod=marker :
  *
@@ -52,6 +52,9 @@
 #include <sys/stat.h>
 #include <sys/xattr.h>
 #include <sys/capability.h>
+
+#include "../ci/ci_version.h"
+CI_VERSION("1.16");
 
 #if defined(AI_RSYNC)
 #include "../../gnulib/lib/md5.h"
@@ -340,7 +343,7 @@ void ai_setxattr(const char *pathname, int fileno, unsigned char *tag, unsigned 
                         G.progname, _tag, val, pathname);
 			}
 			else {
-                if (G.debug) {
+                if (G.debug >= 3) {
                     fprintf(stderr, "%s: fsetxattr(REPLACE, %s, %s) for \"%s\" : OK\n",
                             G.progname, _tag, val, pathname);
                 }
@@ -353,7 +356,7 @@ void ai_setxattr(const char *pathname, int fileno, unsigned char *tag, unsigned 
 		}
 	}
 	else {
-        if (G.debug) {
+        if (G.debug >= 3) {
             fprintf(stderr, "%s: fsetxattr(CREATE,  %s, %s) for \"%s\" : OK\n",
                     G.progname, _tag, val, pathname);
         }
@@ -495,13 +498,13 @@ void ai_setxattr_sums(const char *pathname, ai_xattr_sums *ref_xattr_sums)
             /* Checksum timestamp is consistent with i-node change */
             _good		= TRUE;
 
-            if (G.debug) {
+            if (G.debug >= 2) {
                 fprintf(stderr, "%s: [DEBUG] checksum timestamp consistent with i-node for \"%s\"\n",
                         G.progname, pathname);
             }
         }
         else {
-            if (G.debug) {
+            if (G.debug >= 2) {
                 fprintf(stderr, "%s: [DEBUG] checksum timestamp is NOT consistent with i-node for \"%s\"\n",
                          G.progname, pathname);
                 fprintf(stderr, "%lu != %lu\n", _time, _stat.st_ctime);
@@ -548,7 +551,7 @@ ai_retcode ai_getxattr_sums(const char *pathname)
         if ((_lg = getxattr(pathname, _tag, _val, sizeof(_val) - 1)) == -1) {
             _errno              = errno;
 
-            if (G.debug) {
+            if (G.debug >= 2) {
                 fprintf(stderr, "%-*s : [DEBUG] tag [%-*s] NOT FOUND in xattr\n",
                         G.path_width, pathname, G.tag_width, _tag);
 //                fprintf(stderr, "errno = %d (%s)\n", _errno, strerror(_errno));
@@ -587,7 +590,7 @@ ai_retcode ai_getxattr_sums(const char *pathname)
         else {
             _val[_lg]           = '\0';
 
-            if (G.debug) {
+            if (G.debug >= 2) {
                 fprintf(stderr, "%-*s : [DEBUG] tag [%-*s] found in xattr\n",
                         G.path_width, pathname, G.tag_width, _tag);
             }
@@ -602,7 +605,7 @@ ai_retcode ai_getxattr_sums(const char *pathname)
                 /* Check timestamp consistency */
                 if (strcmp(_val, _ctime)) {
                     /* Timestamps are inconsistent */
-                    if (G.debug) {
+                    if (G.debug >= 2) {
                         fprintf(stderr, "%-*s : [DEBUG] timestamps are NOT CONSISTENT (%s != %s)\n",
                                 G.path_width, pathname, _val, _ctime);
                         fprintf(stderr, "%-*s : [DEBUG] %s (xattr) != %s (ctime)\n",
@@ -612,7 +615,7 @@ ai_retcode ai_getxattr_sums(const char *pathname)
                     _up_to_date     = FALSE;
                 }
                 else {
-                    if (G.debug) {
+                    if (G.debug >= 2) {
                         fprintf(stderr, "%-*s : [DEBUG] timestamps are consistent\n",
                                 G.path_width, pathname);
                     }
@@ -628,26 +631,26 @@ ai_retcode ai_getxattr_sums(const char *pathname)
     /* Prepare the return code */
     if (_checksums_count == 0) {
         /* No checksum found in xattr */
-        if (G.debug) {
+        if (G.debug >= 2) {
             fprintf(stderr, "%-*s : [DEBUG] no checksums in xattr\n", G.path_width, pathname);
         }
         _retcode    = AI_RET_ERR_XATTR_NO_SUMS;
     }
     else if (_checksums_count < AI_CHECKSUMS_NR) {
         /* Missing checksums */
-        if (G.debug) {
+        if (G.debug >= 2) {
             fprintf(stderr, "%-*s : [DEBUG] missing checksums in xattr\n", G.path_width, pathname);
         }
         _retcode    = AI_RET_ERR_XATTR_MISSING_SUMS;
     }
     else if (_up_to_date == TRUE) {
-        if (G.debug) {
+        if (G.debug >= 2) {
             fprintf(stderr, "%-*s : [DEBUG] all checksums are in xattr\n", G.path_width, pathname);
         }
         _retcode    = AI_RET_OK;
     }
     else {
-        if (G.debug) {
+        if (G.debug >= 2) {
             fprintf(stderr, "%-*s : [DEBUG] xattr need update\n", G.path_width, pathname);
         }
         _retcode    = AI_RET_ERR_XATTR_NEEDS_UPDATE;
@@ -701,7 +704,7 @@ void ai_get_checksums(const char *pathname, ai_xattr_sums *ref_xattr_sums, int *
         switch (_retcode) {
 
         case AI_RET_OK:
-            if (G.debug) {
+            if (G.debug >= 2) {
                 fprintf(stderr, "%-*s : [DEBUG] checksums are retrieved from xattr\n",
                        G.path_width, pathname);
             }
@@ -830,7 +833,7 @@ void ai_get_checksums(const char *pathname, ai_xattr_sums *ref_xattr_sums, int *
     }
 
     if (_do_compute) {
-        if (G.debug) {
+        if (G.debug >= 2) {
             fprintf(stderr, "%-*s : [DEBUG] checksums are computed\n",
                    G.path_width, pathname);
         }

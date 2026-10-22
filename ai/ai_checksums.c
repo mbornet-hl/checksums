@@ -2,7 +2,7 @@
  *  Simultaneous computation of MD5, SHA256 and SHA512 checksums of a file
  *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- *  @(#) [Zen] ai_checksums.c   Version 1.51 du 26/09/30 - 
+ *  @(#) [Zen] ai_checksums.c   Version 1.53 du 26/10/22 - 
  *
  *  vim: ts=4 sw=4 et foldmethod=marker :
  *
@@ -34,6 +34,9 @@
 #include <sys/capability.h>
 #include <ftw.h>
 
+#include "../ci/ci_version.h"
+CI_VERSION("1.53");
+
 #include "../gnulib/lib/md5.h"
 #include "../gnulib/lib/sha256.h"
 #include "../gnulib/lib/sha512.h"
@@ -43,7 +46,7 @@
 /* Includes }}} */
 
 /* Version of the program */
-#define AI_VERSION              ("1.51")
+#define AI_VERSION              ("1.53")
 
 /* ai_max() {{{ */
 
@@ -105,7 +108,7 @@ void usage()
     fprintf(stderr, "Usage : %s [-hvDNfM25rsdOCmnulL][-w width] pathname [pathname ...]\n", G.progname);
     fprintf(stderr, "  -h : help\n");
     fprintf(stderr, "  -v : verbose mode (for lists, and to display the origin of checksums)\n");
-    fprintf(stderr, "  -D : display debug information\n");
+    fprintf(stderr, "  -D : display debug information (-D, -DD, -DDD)\n");
     fprintf(stderr, "  -N : display pathname only\n");
     fprintf(stderr, "  -f : force checksums computation\n");
     fprintf(stderr, "  -M : display MD5 checksum\n");
@@ -226,43 +229,43 @@ int ai_traverse(const char *pathname, const struct stat *stat, int typeflag,
         break;
 
     case FTW_D:
-        if (G.debug) {
+        if (G.debug >= 2) {
             fprintf(stderr, "%-*s : [DEBUG] %s(): FTW_D\n", G.path_width, pathname, __func__);
         }
         break;
 
     case FTW_DNR:
-        if (G.debug) {
+        if (G.debug >= 2) {
             fprintf(stderr, "%-*s : [DEBUG] %s(): FTW_DNR\n", G.path_width, pathname, __func__);
         }
         break;
 
     case FTW_DP:
-        if (G.debug) {
+        if (G.debug >= 2) {
             fprintf(stderr, "%-*s : [DEBUG] %s(): FTW_DR\n", G.path_width, pathname, __func__);
         }
         break;
 
     case FTW_NS:
-        if (G.debug) {
+        if (G.debug >= 2) {
             fprintf(stderr, "%-*s : [DEBUG] %s(): FTW_NS\n", G.path_width, pathname, __func__);
         }
         break;
 
     case FTW_SL:
-        if (G.debug) {
+        if (G.debug >= 2) {
             fprintf(stderr, "%-*s : [DEBUG] %s(): FTW_SL\n", G.path_width, pathname, __func__);
         }
         break;
 
     case FTW_SLN:
-        if (G.debug) {
+        if (G.debug >= 2) {
             fprintf(stderr, "%-*s : [DEBUG] %s(): FTW_SLN\n", G.path_width, pathname, __func__);
         }
         break;
 
     default:
-        if (G.debug) {
+        if (G.debug >= 2) {
             fprintf(stderr, "%-*s : [DEBUG] %s(): 0x%08X\n", G.path_width, pathname, __func__, typeflag);
         }
         break;
@@ -280,7 +283,7 @@ int ai_traverse(const char *pathname, const struct stat *stat, int typeflag,
 ******************************************************************************/
 int main(int argc, char *argv[])
 {
-    int                  _opt, _i;
+    int                  _opt, _i, _exit_code = EXIT_SUCCESS;
     struct stat          _stat;
 
     G.progname          = argv[0];
@@ -448,15 +451,19 @@ int main(int argc, char *argv[])
 
     /* Treat all arguments */
     for (_i = optind; _i < argc; _i++) {
+        if (G.debug) {
+            fprintf(stderr, "%s: [DEBUG] %s\n", G.progname, argv[_i]);
+        }
+
         if (stat(argv[_i], &_stat) == -1) {
             fprintf(stderr, "%s: cannot stat \"%s\" !\n", G.progname, argv[_i]);
-            exit(AI_EXIT_ERR_STAT);
+            _exit_code      = AI_EXIT_ERR_STAT;
         }
-        if ((_stat.st_mode & S_IFMT) == S_IFDIR) {
+        else if ((_stat.st_mode & S_IFMT) == S_IFDIR) {
             G.unique_target     = FALSE;
             if (nftw(argv[_i], ai_traverse, 32, FTW_PHYS|FTW_ACTIONRETVAL) == -1) {
                 perror("nftw");
-                exit(AI_EXIT_ERR_STAT);
+                _exit_code      = AI_EXIT_ERR_STAT;
             }
         }
         else if ((_stat.st_mode & S_IFMT) == S_IFREG) {
@@ -464,18 +471,14 @@ int main(int argc, char *argv[])
             ai_task_checksums(argv[_i], &_stat);
         }
         else {
-            fprintf(stderr, "%s: \"%s\" is not a regular file nor a directory.\n",
-                    G.progname, argv[_i]);
+            if (!G.silent) {
+                fprintf(stderr, "%s: \"%s\" is not a regular file nor a directory.\n",
+                        G.progname, argv[_i]);
+            }
         }
     }
 
-#if 0
-    if (G.list) {
-        fprintf(stderr, "*** %s: list only => no xattr have been updated.\n", G.progname);
-    }
-#endif
-
-    return EXIT_SUCCESS;
+    return _exit_code;
 }
 
 /* main() }}} */
