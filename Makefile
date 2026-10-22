@@ -2,7 +2,7 @@
 #	Makefile for the generation of the "checksums" command
 #	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-#	@(#)	[Zen] ai_Makefile	Version 1.8 du 26/10/22 - 
+#	@(#)	[Zen] ai_Makefile	Version 1.9 du 26/10/22 - 
 #
 
 MODULE		= ai
@@ -39,16 +39,16 @@ $(GNULIB_LIB)	:
 			fi
 			cd $(GNULIB_BUILD) && ./configure && $(MAKE)
 
-$(MODULE)/lib	: $(GNULIB_LIB)
+$(MODULE)/lib	: $(GNULIB_LIB) ai/ai_checksums.c ai/ai_cpri.h ai/ai_epri.h ai/ai_gpri.c ai/ai_xattr.c
 			cd $(MODULE); make -f $(MODULE)_makefile
 
 $(TARGET)		: $(TARGET_o) $(GNULIB_LIB)
-			ar x ai/lib $(TARGET_o)
 			$(CC) $(CFLAGS) $(TARGET_o) -o $(TARGET) $(LIBS) $(LDLIBS)
 			strip $(TARGET)
 			./$(TARGET) -h
 
 $(TARGET_o)	: $(MODULE)/lib $(GNULIB_LIB)
+			ar x ai/lib $(TARGET_o)
 
 clean		:
 			rm -f *.o $(TARGET)
