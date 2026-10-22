@@ -28,11 +28,11 @@ These checksums are computed simultaneously using threads and CPU affinity.
 
 ``` bash
 $ checksums -h
-checksums : version 1.51
+checksums : version 1.53
 Usage : checksums [-hvDNfM25rsdOCmnulL][-w width] pathname [pathname ...]
   -h : help
   -v : verbose mode (for lists, and to display the origin of checksums)
-  -D : display debug information
+  -D : display debug information (-D, -DD, -DDD)
   -N : display pathname only
   -f : force checksums computation
   -M : display MD5 checksum
