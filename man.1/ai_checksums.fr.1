@@ -1,0 +1,138 @@
+.\"
+.\" Manpage for checksums command (French)
+.\"
+.\"	@(#)	[Zen] ��c	Version 1.2 du 26/10/26 - 
+.\"
+.TH CHECKSUMS 1 "26 Octobre 2026" "checksums 1.53" "Commandes utilisateur"
+.SH NOM
+checksums \- calcule, gère et affiche les sommes de contrôle de fichiers stockées dans les attributs étendus
+.SH SYNOPSIS
+.B checksums
+[\fB\-hvDNfM25rsdOCmnulL\fR]
+[\fB\-w\fR \fIlargeur\fR]
+.I chemin
+[\fIchemin\fR ...]
+.SH DESCRIPTION
+.B checksums
+est un utilitaire conçu pour calculer des sommes de contrôle numériques (\fBMD5\fR, \fBSHA256\fR, \fBSHA512\fR) et les persister en tant qu'attributs étendus (\fIxattr\fR) dans l'espace de noms \fItrusted\fR.
+
+Seul l'utilisateur
+.B root
+détient les privilèges requis pour lire ou écrire ces attributs étendus sécurisés.
+
+Chaque fois qu'un calcul est demandé, l'application calcule obligatoirement les trois algorithmes (\fBMD5\fR, \fBSHA256\fR et \fBSHA512\fR) simultanément et les écrit dans les attributs étendus. Pour garantir la validité et l'intégrité, un horodatage de calcul est stocké avec les hachages en tant que \fIxattr\fR dédié.
+
+La validité des sommes de contrôle stockées est vérifiée en comparant l'horodatage enregistré à l'heure de modification de l'inode du fichier (\fIctime\fR). Parce que le \fIctime\fR est géré exclusivement par le noyau et ne peut pas être modifié arbitrairement par les utilitaires de l'espace utilisateur, toute modification du fichier survenant après le calcul invalide les sommes de contrôle stockées.
+
+Lorsqu'un
+.I chemin
+cible est un répertoire, seuls les fichiers directement situés dans ce répertoire sont traités. Si l'option
+.B \-r
+est spécifiée, le traitement s'étend à toute l'arborescence du répertoire.
+
+Les indicateurs de vérification d'état (\fB\-O\fR, \fB\-C\fR, \fB\-n\fR, \fB\-m\fR, \fB\-u\fR, \fB\-l\fR) n'exécutent aucun calcul ; ils inspectent et signalent strictement l'état des attributs étendus.
+
+.SH OPTIONS
+.TP
+.B \-h
+Affiche un résumé des options de la commande et quitte.
+.TP
+.B \-v
+Active la sortie verbeuse. Affiche les détails de la liste et indique l'origine de chaque somme de contrôle (récupérée de xattr ou calculée à la volée).
+.TP
+.B \-D
+Affiche les informations de débogage sur la sortie standard. Cet indicateur peut être spécifié plusieurs fois (par ex., \fB\-DD\fR, \fB\-DDD\fR) pour augmenter la verbosité du débogage.
+.TP
+.B \-N
+Affiche uniquement les chemins.
+.TP
+.B \-f
+Force le recalcul complet des trois sommes de contrôle, indépendamment de l'état actuel des xattr ou de la validité de l'horodatage.
+.TP
+.B \-M
+Affiche la somme de contrôle MD5. Si le calcul est requis, MD5, SHA256 et SHA512 sont tous générés.
+.TP
+.B \-2
+Affiche la somme de contrôle SHA256. Si le calcul est requis, MD5, SHA256 et SHA512 sont tous générés.
+.TP
+.B \-5
+Affiche la somme de contrôle SHA512. Si le calcul est requis, MD5, SHA256 et SHA512 sont tous générés.
+.TP
+.B \-r
+Traite toute l'arborescence à partir du répertoire spécifié (parcours récursif).
+.TP
+.B \-s
+Mode silencieux. Supprime les messages non essentiels.
+.TP
+.B \-d
+Affiche la somme de contrôle du répertoire (spécifique à ce programme).
+.TP
+.B \-O
+Liste uniquement les fichiers ayant les trois sommes de contrôle valides dans xattr.
+.TP
+.B \-C
+Liste uniquement les fichiers nécessitant un calcul de somme de contrôle.
+.TP
+.B \-n
+Liste uniquement les fichiers n'ayant aucune somme de contrôle dans xattr.
+.TP
+.B \-m
+Liste uniquement les fichiers avec des sommes de contrôle manquantes dans xattr.
+.TP
+.B \-u
+Liste les fichiers dont les sommes de contrôle xattr doivent être mises à jour (où le \fIctime\fR système est plus récent que l'horodatage xattr stocké).
+.TP
+.B \-l
+Liste l'état global des sommes de contrôle xattr pour les fichiers cibles.
+.TP
+.B \-L
+Format d'affichage hérité. Produit une sortie similaire aux outils standard (\fBmd5sum\fR, \fBsha256sum\fR, \fBsha512sum\fR). Combiné avec plusieurs algorithmes (par ex., \fB\-LM25\fR), les colonnes de sortie sont proprement formatées et alignées.
+.TP
+.BI \-w " largeur"
+Spécifie la largeur de colonne utilisée pour afficher les chemins.
+
+.SH EXEMPLES
+.TP
+Calcule et stocke les sommes de contrôle pour les fichiers situés directement dans un répertoire :
+.nf
+.RS
+# checksums \-2 /var/log
+.RE
+.fi
+
+.TP
+Parcourt toute une arborescence et affiche MD5 et SHA512 au format hérité :
+.nf
+.RS
+# checksums \-rLM5 /home/user/documents
+.RE
+.fi
+
+.TP
+Inspecte l'arborescence d'un serveur web pour les fichiers modifiés dont le \fIctime\fR système est postérieur à l'horodatage xattr :
+.nf
+.RS
+# checksums \-ru /var/www/html
+.RE
+.fi
+
+.TP
+Force le recalcul de toutes les sommes de contrôle sur une arborescence avec une largeur de chemin personnalisée et le débogage activé :
+.nf
+.RS
+# checksums \-DDfr2 \-w 45 /usr/local/bin
+.RE
+.fi
+
+.SH SÉCURITÉ ET REMARQUES
+.IP \(bu 2
+L'accès à l'espace de noms d'attributs étendus \fItrusted\fR nécessite strictement les privilèges root.
+.IP \(bu 2
+La validation de l'intégrité repose sur le \fIctime\fR système. Puisque le \fIctime\fR ne peut pas être falsifié par les outils utilisateur (contrairement à \fImtime\fR ou \fIatime\fR via \fButimes\fR(2)), sa comparaison avec l'horodatage xattr stocké garantit une détection précise des altérations de fichiers.
+
+.SH VOIR AUSSI
+.BR md5sum (1),
+.BR sha256sum (1),
+.BR setfattr (1),
+.BR getfattr (1),
+.BR stat (2)

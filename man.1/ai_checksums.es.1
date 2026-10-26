@@ -1,0 +1,138 @@
+.\"
+.\" Manpage for checksums command (Spanish)
+.\"
+.\"	@(#)	[Zen] "�\	Version 1.1 du 26/10/26 - 
+.\"
+.TH CHECKSUMS 1 "26 de Octubre de 2026" "checksums 1.53" "Comandos de usuario"
+.SH NOMBRE
+checksums \- calcula, gestiona y muestra las sumas de comprobación de archivos almacenadas en atributos extendidos
+.SH SINOPSIS
+.B checksums
+[\fB\-hvDNfM25rsdOCmnulL\fR]
+[\fB\-w\fR \fIancho\fR]
+.I ruta
+[\fIruta\fR ...]
+.SH DESCRIPCIÓN
+.B checksums
+es una utilidad diseñada para calcular sumas de comprobación digitales (\fBMD5\fR, \fBSHA256\fR, \fBSHA512\fR) y persistirlas como atributos extendidos (\fIxattr\fR) dentro del espacio de nombres \fItrusted\fR.
+
+Solo el usuario
+.B root
+posee los privilegios requeridos para leer o escribir estos atributos extendidos asegurados.
+
+Cada vez que se solicita un cálculo de suma de comprobación, la aplicación calcula obligatoriamente los tres algoritmos (\fBMD5\fR, \fBSHA256\fR y \fBSHA512\fR) simultáneamente y los escribe en los atributos extendidos. Para garantizar la validez e integridad, se almacena una marca de tiempo de cálculo junto con los hashes como un \fIxattr\fR dedicado.
+
+La validez de las sumas de comprobación almacenadas se verifica comparando la marca de tiempo guardada con la hora de cambio de inodo del archivo (\fIctime\fR). Dado que el \fIctime\fR es gestionado exclusivamente por el kernel y no puede ser modificado arbitrariamente por utilidades de espacio de usuario, cualquier modificación del archivo que ocurra después del cálculo invalida las sumas de comprobación almacenadas.
+
+Cuando una
+.I ruta
+de destino es un directorio, solo se procesan los archivos directamente ubicados dentro de ese directorio. Si se especifica la opción
+.B \-r
+, el procesamiento se extiende a todo el árbol de directorios a partir de ese directorio.
+
+Los indicadores de comprobación de estado (\fB\-O\fR, \fB\-C\fR, \fB\-n\fR, \fB\-m\fR, \fB\-u\fR, \fB\-l\fR) no ejecutan ningún cálculo de suma de comprobación; inspeccionan e informan estrictamente sobre el estado de los atributos extendidos.
+
+.SH OPCIONES
+.TP
+.B \-h
+Muestra un resumen de las opciones del comando y sale.
+.TP
+.B \-v
+Habilita la salida detallada. Muestra los detalles de la lista e indica el origen de cada suma de comprobación (ya sea recuperada de xattr o calculada sobre la marcha).
+.TP
+.B \-D
+Imprime información de depuración en la salida estándar. Este indicador se puede especificar varias veces (ej., \fB\-DD\fR, \fB\-DDD\fR) para aumentar el nivel de detalle de la depuración.
+.TP
+.B \-N
+Imprime solo las rutas.
+.TP
+.B \-f
+Fuerza el recálculo completo de las tres sumas de comprobación, independientemente del estado actual de los xattr o de la validez de la marca de tiempo.
+.TP
+.B \-M
+Muestra la suma de comprobación MD5. Si se requiere cálculo, se generan MD5, SHA256 y SHA512.
+.TP
+.B \-2
+Muestra la suma de comprobación SHA256. Si se requiere cálculo, se generan MD5, SHA256 y SHA512.
+.TP
+.B \-5
+Muestra la suma de comprobación SHA512. Si se requiere cálculo, se generan MD5, SHA256 y SHA512.
+.TP
+.B \-r
+Procesa todo el árbol de directorios a partir del directorio especificado (recorrido recursivo).
+.TP
+.B \-s
+Modo silencioso. Suprime los mensajes no esenciales.
+.TP
+.B \-d
+Muestra la suma de comprobación del directorio (específico de este programa).
+.TP
+.B \-O
+Lista solo los archivos que tienen las tres sumas de comprobación válidas presentes en xattr.
+.TP
+.B \-C
+Lista solo los archivos que requieren el cálculo de la suma de comprobación.
+.TP
+.B \-n
+Lista solo los archivos que no tienen sumas de comprobación en xattr.
+.TP
+.B \-m
+Lista solo los archivos que tienen sumas de comprobación faltantes en xattr.
+.TP
+.B \-u
+Lista los archivos cuyas sumas de comprobación en xattr necesitan una actualización (donde el \fIctime\fR del sistema es más reciente que la marca de tiempo de cálculo xattr almacenada).
+.TP
+.B \-l
+Lista el estado general de las sumas de comprobación xattr para los archivos de destino.
+.TP
+.B \-L
+Formato de visualización heredado. Produce una salida similar a las herramientas estándar (\fBmd5sum\fR, \fBsha256sum\fR, \fBsha512sum\fR). Cuando se combina con varios algoritmos (ej., \fB\-LM25\fR), las columnas de salida están ordenadamente formateadas y alineadas.
+.TP
+.BI \-w " ancho"
+Especifica el ancho de columna utilizado para mostrar las rutas.
+
+.SH EJEMPLOS
+.TP
+Calcula y almacena las sumas de comprobación de los archivos ubicados directamente en un directorio:
+.nf
+.RS
+# checksums \-2 /var/log
+.RE
+.fi
+
+.TP
+Recorre todo un árbol de directorios y muestra MD5 y SHA512 en formato heredado:
+.nf
+.RS
+# checksums \-rLM5 /home/user/documents
+.RE
+.fi
+
+.TP
+Inspecciona un árbol de directorios de un servidor web en busca de archivos modificados cuyo \fIctime\fR de sistema es posterior a la marca de tiempo xattr:
+.nf
+.RS
+# checksums \-ru /var/www/html
+.RE
+.fi
+
+.TP
+Fuerza el recálculo de todas las sumas de comprobación en un árbol de directorios con un ancho de visualización de ruta personalizado, con la depuración habilitada:
+.nf
+.RS
+# checksums \-DDfr2 \-w 45 /usr/local/bin
+.RE
+.fi
+
+.SH SEGURIDAD Y NOTAS
+.IP \(bu 2
+El acceso al espacio de nombres de atributos extendidos \fItrusted\fR requiere estrictamente privilegios de root.
+.IP \(bu 2
+La validación de integridad se basa en el \fIctime\fR del sistema. Dado que el \fIctime\fR no puede ser falsificado por herramientas de usuario (a diferencia de \fImtime\fR o \fIatime\fR a través de \fButimes\fR(2)), su comparación con la marca de tiempo xattr almacenada garantiza una detección precisa de las alteraciones de archivos.
+
+.SH VÉASE TAMBIÉN
+.BR md5sum (1),
+.BR sha256sum (1),
+.BR setfattr (1),
+.BR getfattr (1),
+.BR stat (2)

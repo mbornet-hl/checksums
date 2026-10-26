@@ -1,0 +1,138 @@
+.\"
+.\" Manpage for checksums command (Italian)
+.\"
+.\"	@(#)	[Zen] �u�^	Version 1.1 du 26/10/26 - 
+.\"
+.TH CHECKSUMS 1 "26 Ottobre 2026" "checksums 1.53" "Comandi utente"
+.SH NOME
+checksums \- calcola, gestisce e visualizza i checksum dei file memorizzati negli attributi estesi
+.SH SINTASSI
+.B checksums
+[\fB\-hvDNfM25rsdOCmnulL\fR]
+[\fB\-w\fR \fIlarghezza\fR]
+.I percorso
+[\fIpercorso\fR ...]
+.SH DESCRIZIONE
+.B checksums
+è un'utilità progettata per calcolare checksum digitali (\fBMD5\fR, \fBSHA256\fR, \fBSHA512\fR) e renderli persistenti come attributi estesi (\fIxattr\fR) all'interno dello spazio dei nomi \fItrusted\fR.
+
+Solo l'utente
+.B root
+possiede i privilegi necessari per leggere o scrivere questi attributi estesi di sicurezza.
+
+Ogni volta che viene richiesto un calcolo di checksum, l'applicazione calcola obbligatoriamente tutti e tre gli algoritmi (\fBMD5\fR, \fBSHA256\fR e \fBSHA512\fR) contemporaneamente e li scrive negli attributi estesi. Per garantire validità e integrità, un timestamp di calcolo viene memorizzato insieme agli hash come \fIxattr\fR dedicato.
+
+La validità dei checksum memorizzati viene verificata confrontando il timestamp salvato con il tempo di modifica dell'inode del file (\fIctime\fR). Poiché il \fIctime\fR è gestito esclusivamente dal kernel e non può essere modificato arbitrariamente dalle utilità dello spazio utente, qualsiasi modifica del file che si verifica dopo il calcolo invalida i checksum memorizzati.
+
+Quando un
+.I percorso
+di destinazione è una directory, vengono elaborati solo i file direttamente presenti all'interno di quella directory. Se viene specificata l'opzione
+.B \-r
+, l'elaborazione si estende all'intero albero di directory a partire da quella directory.
+
+I flag di controllo dello stato (\fB\-O\fR, \fB\-C\fR, \fB\-n\fR, \fB\-m\fR, \fB\-u\fR, \fB\-l\fR) non eseguono alcun calcolo del checksum; ispezionano e riportano rigorosamente lo stato degli attributi estesi.
+
+.SH OPZIONI
+.TP
+.B \-h
+Visualizza un riepilogo delle opzioni del comando ed esce.
+.TP
+.B \-v
+Abilita l'output dettagliato. Visualizza i dettagli della lista e indica l'origine di ogni checksum (se recuperato da xattr o calcolato al volo).
+.TP
+.B \-D
+Stampa le informazioni di debug sullo standard output. Questo flag può essere specificato più volte (es., \fB\-DD\fR, \fB\-DDD\fR) per aumentare il livello di verbosità del debug.
+.TP
+.B \-N
+Stampa solo i percorsi.
+.TP
+.B \-f
+Forza il ricalcolo completo di tutti e tre i checksum, indipendentemente dallo stato corrente degli xattr o dalla validità del timestamp.
+.TP
+.B \-M
+Visualizza il checksum MD5. Se è richiesto il calcolo, vengono generati MD5, SHA256 e SHA512.
+.TP
+.B \-2
+Visualizza il checksum SHA256. Se è richiesto il calcolo, vengono generati MD5, SHA256 e SHA512.
+.TP
+.B \-5
+Visualizza il checksum SHA512. Se è richiesto il calcolo, vengono generati MD5, SHA256 e SHA512.
+.TP
+.B \-r
+Elabora l'intero albero di directory a partire dalla directory specificata (attraversamento ricorsivo).
+.TP
+.B \-s
+Modalità silenziosa. Sopprime i messaggi non essenziali.
+.TP
+.B \-d
+Visualizza il checksum della directory (specifico per questo programma).
+.TP
+.B \-O
+Elenca solo i file che hanno tutti e tre i checksum validi presenti in xattr.
+.TP
+.B \-C
+Elenca solo i file che richiedono il calcolo del checksum.
+.TP
+.B \-n
+Elenca solo i file che non hanno checksum in xattr.
+.TP
+.B \-m
+Elenca solo i file che hanno checksum mancanti in xattr.
+.TP
+.B \-u
+Elenca i file i cui checksum in xattr richiedono un aggiornamento (dove il \fIctime\fR di sistema è più recente del timestamp di calcolo xattr memorizzato).
+.TP
+.B \-l
+Elenca lo stato generale dei checksum xattr per i file di destinazione.
+.TP
+.B \-L
+Formato di visualizzazione legacy. Produce un output simile agli strumenti standard (\fBmd5sum\fR, \fBsha256sum\fR, \fBsha512sum\fR). Se combinato con più algoritmi (es., \fB\-LM25\fR), le colonne di output sono formattate e allineate in modo pulito.
+.TP
+.BI \-w " larghezza"
+Specifica la larghezza della colonna utilizzata per visualizzare i percorsi.
+
+.SH ESEMPI
+.TP
+Calcola e memorizza i checksum per i file situati direttamente in una directory:
+.nf
+.RS
+# checksums \-2 /var/log
+.RE
+.fi
+
+.TP
+Attraversa un intero albero di directory e visualizza MD5 e SHA512 in formato legacy:
+.nf
+.RS
+# checksums \-rLM5 /home/user/documents
+.RE
+.fi
+
+.TP
+Ispeziona un albero di directory del server web per i file modificati il cui \fIctime\fR di sistema è successivo al timestamp xattr:
+.nf
+.RS
+# checksums \-ru /var/www/html
+.RE
+.fi
+
+.TP
+Forza il ricalcolo di tutti i checksum in un albero di directory con una larghezza di visualizzazione del percorso personalizzata e con debug abilitato:
+.nf
+.RS
+# checksums \-DDfr2 \-w 45 /usr/local/bin
+.RE
+.fi
+
+.SH SICUREZZA E NOTE
+.IP \(bu 2
+L'accesso allo spazio dei nomi degli attributi estesi \fItrusted\fR richiede rigorosamente i privilegi di root.
+.IP \(bu 2
+La convalida dell'integrità si basa sul \fIctime\fR di sistema. Poiché il \fIctime\fR non può essere falsificato da strumenti utente (a differenza di \fImtime\fR o \fIatime\fR tramite \fButimes\fR(2)), il suo confronto con il timestamp xattr memorizzato garantisce un rilevamento accurato delle alterazioni dei file.
+
+.SH VEDERE ANCHE
+.BR md5sum (1),
+.BR sha256sum (1),
+.BR setfattr (1),
+.BR getfattr (1),
+.BR stat (2)

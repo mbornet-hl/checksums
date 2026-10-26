@@ -1,0 +1,138 @@
+.\"
+.\" Manpage for checksums command (Swedish)
+.\"
+.\"	@(#)	[Zen] YJta	Version 1.1 du 26/10/26 - 
+.\"
+.TH CHECKSUMS 1 "26 Oktober 2026" "checksums 1.53" "Användarkommandon"
+.SH NAMN
+checksums \- beräkna, hantera och visa filkontrollsummor lagrade i utökade attribut
+.SH SYNOPSIS
+.B checksums
+[\fB\-hvDNfM25rsdOCmnulL\fR]
+[\fB\-w\fR \fIbredd\fR]
+.I sökväg
+[\fIsökväg\fR ...]
+.SH BESKRIVNING
+.B checksums
+är ett verktyg utformat för att beräkna digitala kontrollsummor (\fBMD5\fR, \fBSHA256\fR, \fBSHA512\fR) och lagra dem permanent som utökade attribut (\fIxattr\fR) inom \fItrusted\fR-namnrymden.
+
+Endast
+.B root
+-användaren har de nödvändiga behörigheterna för att läsa eller skriva dessa säkrade utökade attribut.
+
+När en beräkning av kontrollsumma begärs, beräknar applikationen obligatoriskt alla tre algoritmerna (\fBMD5\fR, \fBSHA256\fR och \fBSHA512\fR) samtidigt och skriver dem till utökade attribut. För att garantera giltighet och integritet lagras en tidsstämpel för beräkningen tillsammans med hasharna som ett dedikerat \fIxattr\fR.
+
+Giltigheten för lagrade kontrollsummor verifieras genom att jämföra den sparade tidsstämpeln med filens inode-ändringstid (\fIctime\fR). Eftersom \fIctime\fR hanteras exklusivt av kärnan och inte kan ändras godtyckligt av användarverktyg, ogiltigförklarar alla filändringar som sker efter beräkningen de lagrade kontrollsummorna.
+
+När en mål-
+.I sökväg
+är en katalog behandlas endast de filer som finns direkt i den katalogen. Om alternativet
+.B \-r
+anges utökas bearbetningen till hela katalogträdet med start i den katalogen.
+
+Statuskontrollflaggor (\fB\-O\fR, \fB\-C\fR, \fB\-n\fR, \fB\-m\fR, \fB\-u\fR, \fB\-l\fR) utför ingen beräkning av kontrollsumma; de inspekterar och rapporterar strikt tillståndet för de utökade attributen.
+
+.SH ALTERNATIV
+.TP
+.B \-h
+Visa en sammanfattning av kommandoalternativ och avsluta.
+.TP
+.B \-v
+Aktivera detaljerad utmatning. Visar listdetaljer och indikerar ursprunget för varje kontrollsumma (om den hämtats från xattr eller beräknats i farten).
+.TP
+.B \-D
+Skriv ut felsökningsinformation till standardutgången. Denna flagga kan anges flera gånger (t.ex. \fB\-DD\fR, \fB\-DDD\fR) för att öka nivån av felsökningsdetaljer.
+.TP
+.B \-N
+Skriv endast ut sökvägar.
+.TP
+.B \-f
+Tvinga fram fullständig omberäkning av alla tre kontrollsummorna, oavsett aktuell xattr-status eller tidsstämpelns giltighet.
+.TP
+.B \-M
+Visa MD5-kontrollsumma. Om beräkning krävs genereras MD5, SHA256 och SHA512 samtidigt.
+.TP
+.B \-2
+Visa SHA256-kontrollsumma. Om beräkning krävs genereras MD5, SHA256 och SHA512 samtidigt.
+.TP
+.B \-5
+Visa SHA512-kontrollsumma. Om beräkning krävs genereras MD5, SHA256 och SHA512 samtidigt.
+.TP
+.B \-r
+Bearbeta hela katalogträdet med start i den angivna katalogen (rekursiv genomgång).
+.TP
+.B \-s
+Tyst läge. Undertryck icke-nödvändiga meddelanden.
+.TP
+.B \-d
+Visa katalogkontrollsumma (specifikt för detta program).
+.TP
+.B \-O
+Lista endast filer som har alla tre giltiga kontrollsummorna närvarande i xattr.
+.TP
+.B \-C
+Lista endast filer som kräver beräkning av kontrollsumma.
+.TP
+.B \-n
+Lista endast filer som inte har några kontrollsummor i xattr.
+.TP
+.B \-m
+Lista endast filer som saknar kontrollsummor i xattr.
+.TP
+.B \-u
+Lista filer vars kontrollsummor i xattr behöver uppdateras (där systemets \fIctime\fR är nyare än den lagrade xattr-tidsstämpeln).
+.TP
+.B \-l
+Lista övergripande xattr-kontrollsummestatus för målfiler.
+.TP
+.B \-L
+Äldre visningsformat (legacy). Producerar utdata som liknar standardverktyg (\fBmd5sum\fR, \fBsha256sum\fR, \fBsha512sum\fR). I kombination med flera algoritmer (t.ex. \fB\-LM25\fR) formateras och justeras utdatakolumnerna snyggt.
+.TP
+.BI \-w " bredd"
+Ange den kolumnbredd som används för att visa sökvägar.
+
+.SH EXEMPEL
+.TP
+Beräkna och lagra kontrollsummor för filer som finns direkt i en katalog:
+.nf
+.RS
+# checksums \-2 /var/log
+.RE
+.fi
+
+.TP
+Gå igenom ett helt katalogträd och visa MD5 och SHA512 i äldre format:
+.nf
+.RS
+# checksums \-rLM5 /home/user/documents
+.RE
+.fi
+
+.TP
+Inspektera en webbservers katalogträd för modifierade filer vars system-\fIctime\fR är nyare än xattr-tidsstämpeln:
+.nf
+.RS
+# checksums \-ru /var/www/html
+.RE
+.fi
+
+.TP
+Tvinga fram omberäkning av alla kontrollsummor över ett katalogträd med anpassad visningsbredd för sökvägar och med felsökning aktiverad:
+.nf
+.RS
+# checksums \-DDfr2 \-w 45 /usr/local/bin
+.RE
+.fi
+
+.SH SÄKERHET OCH ANMÄRKNINGAR
+.IP \(bu 2
+Åtkomst till namnrymden \fItrusted\fR för utökade attribut kräver strikt root-behörigheter.
+.IP \(bu 2
+Integritetsvalidering förlitar sig på systemets \fIctime\fR. Eftersom \fIctime\fR inte kan förfalskas av användarverktyg (till skillnad från \fImtime\fR eller \fIatime\fR via \fButimes\fR(2)), säkerställer jämförelsen med den lagrade xattr-tidsstämpeln exakt upptäckt av filändringar.
+
+.SH SE ÄVEN
+.BR md5sum (1),
+.BR sha256sum (1),
+.BR setfattr (1),
+.BR getfattr (1),
+.BR stat (2)

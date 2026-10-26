@@ -1,0 +1,138 @@
+.\"
+.\" Manpage for checksums command (German)
+.\"
+.\"	@(#)	[Zen] d`X	Version 1.1 du 26/10/26 - 
+.\"
+.TH CHECKSUMS 1 "26. Oktober 2026" "checksums 1.53" "Benutzerbefehle"
+.SH BEZEICHNUNG
+checksums \- Berechnen, Verwalten und Anzeigen von Datei-Prüfsummen, die in erweiterten Attributen gespeichert sind
+.SH ÜBERSICHT
+.B checksums
+[\fB\-hvDNfM25rsdOCmnulL\fR]
+[\fB\-w\fR \fIBreite\fR]
+.I Pfadname
+[\fIPfadname\fR ...]
+.SH BESCHREIBUNG
+.B checksums
+ist ein Dienstprogramm zur Berechnung digitaler Prüfsummen (\fBMD5\fR, \fBSHA256\fR, \fBSHA512\fR) und deren dauerhafter Speicherung als erweiterte Attribute (\fIxattr\fR) im Namensraum \fItrusted\fR.
+
+Nur der
+.B root
+-Benutzer besitzt die erforderlichen Berechtigungen, um diese gesicherten erweiterten Attribute zu lesen oder zu schreiben.
+
+Wird eine Prüfsummenberechnung angefordert, berechnet die Anwendung zwingend alle drei Algorithmen (\fBMD5\fR, \fBSHA256\fR und \fBSHA512\fR) gleichzeitig und schreibt sie in die erweiterten Attribute. Um Gültigkeit und Integrität zu gewährleisten, wird ein Berechnungszeitstempel zusammen mit den Hashes als dediziertes \fIxattr\fR gespeichert.
+
+Die Gültigkeit gespeicherter Prüfsummen wird überprüft, indem der gespeicherte Zeitstempel mit der Inode-Änderungszeit (\fIctime\fR) der Datei verglichen wird. Da die \fIctime\fR ausschließlich vom Kernel verwaltet wird und nicht willkürlich von Userspace-Dienstprogrammen geändert werden kann, macht jede Dateimodifikation nach der Berechnung die gespeicherten Prüfsummen ungültig.
+
+Wenn ein Ziel-
+.I Pfadname
+ein Verzeichnis ist, werden nur die Dateien verarbeitet, die sich direkt in diesem Verzeichnis befinden. Wenn die Option
+.B \-r
+angegeben wird, erstreckt sich die Verarbeitung auf den gesamten Verzeichnisbaum, der in diesem Verzeichnis wurzelt.
+
+Statusprüfungs-Flags (\fB\-O\fR, \fB\-C\fR, \fB\-n\fR, \fB\-m\fR, \fB\-u\fR, \fB\-l\fR) führen keine Prüfsummenberechnung aus; sie überprüfen ausschließlich den Zustand der erweiterten Attribute und melden diesen.
+
+.SH OPTIONEN
+.TP
+.B \-h
+Zeigt eine Zusammenfassung der Befehlsoptionen an und beendet das Programm.
+.TP
+.B \-v
+Aktiviert ausführliche Ausgaben. Zeigt Listendetails an und gibt den Ursprung jeder Prüfsumme an (ob aus xattr abgerufen oder spontan berechnet).
+.TP
+.B \-D
+Gibt Debugging-Informationen auf der Standardausgabe aus. Dieses Flag kann mehrmals angegeben werden (z. B. \fB\-DD\fR, \fB\-DDD\fR), um die Detailgenauigkeit des Debuggings zu erhöhen.
+.TP
+.B \-N
+Gibt nur Pfadnamen aus.
+.TP
+.B \-f
+Erzwingt eine vollständige Neuberechnung aller drei Prüfsummen, unabhängig vom aktuellen xattr-Status oder der Gültigkeit des Zeitstempels.
+.TP
+.B \-M
+Zeigt die MD5-Prüfsumme an. Falls eine Berechnung erforderlich ist, werden MD5, SHA256 und SHA512 vollständig generiert.
+.TP
+.B \-2
+Zeigt die SHA256-Prüfsumme an. Falls eine Berechnung erforderlich ist, werden MD5, SHA256 und SHA512 vollständig generiert.
+.TP
+.B \-5
+Zeigt die SHA512-Prüfsumme an. Falls eine Berechnung erforderlich ist, werden MD5, SHA256 und SHA512 vollständig generiert.
+.TP
+.B \-r
+Verarbeitet den gesamten Verzeichnisbaum ausgehend vom angegebenen Verzeichnis (rekursiver Durchlauf).
+.TP
+.B \-s
+Stiller Modus. Unterdrückt nicht wesentliche Meldungen.
+.TP
+.B \-d
+Zeigt die Verzeichnisprüfsumme an (spezifisch für dieses Programm).
+.TP
+.B \-O
+Listet nur Dateien auf, bei denen alle drei gültigen Prüfsummen in xattr vorhanden sind.
+.TP
+.B \-C
+Listet nur Dateien auf, die eine Prüfsummenberechnung erfordern.
+.TP
+.B \-n
+Listet nur Dateien auf, die keine Prüfsummen in xattr haben.
+.TP
+.B \-m
+Listet nur Dateien auf, bei denen Prüfsummen in xattr fehlen.
+.TP
+.B \-u
+Listet Dateien auf, deren Prüfsummen in xattr aktualisiert werden müssen (wo die System-\fIctime\fR neuer als der gespeicherte xattr-Berechnungszeitstempel ist).
+.TP
+.B \-l
+Listet den gesamten xattr-Prüfsummenstatus für Zieldateien auf.
+.TP
+.B \-L
+Veraltetes Anzeigeformat (Legacy). Erzeugt eine Ausgabe ähnlich wie Standardwerkzeuge (\fBmd5sum\fR, \fBsha256sum\fR, \fBsha512sum\fR). In Kombination mit mehreren Algorithmen (z. B. \fB\-LM25\fR) werden die Ausgabespalten sauber formatiert und ausgerichtet.
+.TP
+.BI \-w " Breite"
+Gibt die Spaltenbreite an, die zur Anzeige von Pfadnamen verwendet wird.
+
+.SH BEISPIELE
+.TP
+Berechnen und Speichern von Prüfsummen für Dateien, die sich direkt in einem Verzeichnis befinden:
+.nf
+.RS
+# checksums \-2 /var/log
+.RE
+.fi
+
+.TP
+Durchlaufen eines gesamten Verzeichnisbaums und Anzeigen von MD5 und SHA512 im Legacy-Format:
+.nf
+.RS
+# checksums \-rLM5 /home/user/documents
+.RE
+.fi
+
+.TP
+Überprüfen eines Webserver-Verzeichnisbaums auf geänderte Dateien, deren System-\fIctime\fR neuer als der xattr-Zeitstempel ist:
+.nf
+.RS
+# checksums \-ru /var/www/html
+.RE
+.fi
+
+.TP
+Erzwingen der Neuberechnung aller Prüfsummen über einen Verzeichnisbaum hinweg, mit benutzerdefinierter Pfadnamen-Anzeigebreite und aktiviertem Debugging:
+.nf
+.RS
+# checksums \-DDfr2 \-w 45 /usr/local/bin
+.RE
+.fi
+
+.SH SICHERHEIT UND HINWEISE
+.IP \(bu 2
+Der Zugriff auf den erweiterten Attribut-Namensraum \fItrusted\fR erfordert zwingend Root-Rechte.
+.IP \(bu 2
+Die Integritätsprüfung basiert auf der System-\fIctime\fR. Da die \fIctime\fR nicht durch Benutzerwerkzeuge gefälscht werden kann (im Gegensatz zur \fImtime\fR oder \fIatime\fR über \fButimes\fR(2)), gewährleistet der Vergleich mit dem gespeicherten xattr-Zeitstempel eine genaue Erkennung von Dateimanipulationen.
+
+.SH SIEHE AUCH
+.BR md5sum (1),
+.BR sha256sum (1),
+.BR setfattr (1),
+.BR getfattr (1),
+.BR stat (2)

@@ -1,0 +1,138 @@
+.\"
+.\" Manpage for checksums command (English)
+.\"
+.\"	@(#)	[Zen] ai_checksums.1	Version 1.2 du 26/10/26 - 
+.\"
+.TH CHECKSUMS 1 "October 26, 2026" "checksums 1.53" "User Commands"
+.SH NAME
+checksums \- compute, manage, and display file checksums stored in extended attributes
+.SH SYNOPSIS
+.B checksums
+[\fB\-hvDNfM25rsdOCmnulL\fR]
+[\fB\-w\fR \fIwidth\fR]
+.I pathname
+[\fIpathname\fR ...]
+.SH DESCRIPTION
+.B checksums
+is a utility designed to compute digital checksums (\fBMD5\fR, \fBSHA256\fR, \fBSHA512\fR) and persist them as extended attributes (\fIxattr\fR) within the \fItrusted\fR namespace.
+
+Only the
+.B root
+user holds the required privileges to read or write these secured extended attributes.
+
+Whenever a checksum calculation is requested, the application mandatorily computes all three algorithms (\fBMD5\fR, \fBSHA256\fR, and \fBSHA512\fR) simultaneously and writes them to extended attributes. To guarantee validity and integrity, a calculation timestamp is stored alongside the hashes as a dedicated \fIxattr\fR.
+
+The validity of stored checksums is verified by comparing the saved timestamp against the file's inode change time (\fIctime\fR). Because \fIctime\fR is managed exclusively by the kernel and cannot be arbitrarily modified by userspace utilities, any file modification occurring after computation invalidates the stored checksums.
+
+When a target
+.I pathname
+is a directory, only the files directly located within that directory are processed. If the
+.B \-r
+option is specified, processing extends to the entire directory tree rooted at that directory.
+
+Status-checking flags (\fB\-O\fR, \fB\-C\fR, \fB\-n\fR, \fB\-m\fR, \fB\-u\fR, \fB\-l\fR) do not execute any checksum computation; they strictly inspect and report the state of the extended attributes.
+
+.SH OPTIONS
+.TP
+.B \-h
+Display a summary of command options and exit.
+.TP
+.B \-v
+Enable verbose output. Displays list details and indicates the origin of each checksum (whether retrieved from xattr or computed on-the-fly).
+.TP
+.B \-D
+Print debugging information to standard output. This flag can be specified multiple times (e.g., \fB\-DD\fR, \fB\-DDD\fR) to increase the level of debugging verbosity.
+.TP
+.B \-N
+Print pathnames only.
+.TP
+.B \-f
+Force complete re-computation of all three checksums, regardless of current xattr status or timestamp validity.
+.TP
+.B \-M
+Display MD5 checksum. If computation is required, MD5, SHA256, and SHA512 are all generated.
+.TP
+.B \-2
+Display SHA256 checksum. If computation is required, MD5, SHA256, and SHA512 are all generated.
+.TP
+.B \-5
+Display SHA512 checksum. If computation is required, MD5, SHA256, and SHA512 are all generated.
+.TP
+.B \-r
+Process the entire directory tree rooted at the specified directory (recursive traversal).
+.TP
+.B \-s
+Silent mode. Suppress non-essential messages.
+.TP
+.B \-d
+Display directory checksum (specific to this program).
+.TP
+.B \-O
+List only files that have all three valid checksums present in xattr.
+.TP
+.B \-C
+List only files that require checksum computation.
+.TP
+.B \-n
+List only files that have no checksums in xattr.
+.TP
+.B \-m
+List only files that have missing checksums in xattr.
+.TP
+.B \-u
+List files whose checksums in xattr need an update (where system \fIctime\fR is newer than the stored xattr computation timestamp).
+.TP
+.B \-l
+List overall xattr checksum status for target files.
+.TP
+.B \-L
+Legacy display format. Produces output similar to standard tools (\fBmd5sum\fR, \fBsha256sum\fR, \fBsha512sum\fR). When combined with multiple algorithms (e.g., \fB\-LM25\fR), output columns are cleanly formatted and aligned.
+.TP
+.BI \-w " width"
+Specify the column width used to display pathnames.
+
+.SH EXAMPLES
+.TP
+Compute and store checksums for files located directly in a directory:
+.nf
+.RS
+# checksums \-2 /var/log
+.RE
+.fi
+
+.TP
+Traverse an entire directory tree and display MD5 and SHA512 in legacy format:
+.nf
+.RS
+# checksums \-rLM5 /home/user/documents
+.RE
+.fi
+
+.TP
+Inspect a web server directory tree for modified files whose system \fIctime\fR postdates the xattr timestamp:
+.nf
+.RS
+# checksums \-ru /var/www/html
+.RE
+.fi
+
+.TP
+Force re-computation of all checksums across a directory tree with a custom pathname display width, with debugging enabled:
+.nf
+.RS
+# checksums \-DDfr2 \-w 45 /usr/local/bin
+.RE
+.fi
+
+.SH SECURITY AND NOTES
+.IP \(bu 2
+Access to the \fItrusted\fR extended attribute namespace strictly requires root privileges.
+.IP \(bu 2
+Integrity validation relies on system \fIctime\fR. Since \fIctime\fR cannot be forged by user tools (unlike \fImtime\fR or \fIatime\fR via \fButimes\fR(2)), comparing it against the stored xattr timestamp ensures accurate detection of file alterations.
+
+.SH SEE ALSO
+.BR md5sum (1),
+.BR sha256sum (1),
+.BR setfattr (1),
+.BR getfattr (1),
+.BR stat (2)
