@@ -7,12 +7,11 @@ To compile **checksums** from the source files, type :
 ``` bash
 $ make
 ```
+:warning:
+Accessing **trusted xattrs** requires **root** privileges. Do **not** set
+the SUID bit or grant **CAP_SYS_ADMIN** to the `checksums` binary. The current
+implementation does not enforce file access permission checks for the invoking user.
 
-Only **root** is allowed to access **trusted xattr** but the capability
-**CAP_SYS_ADMIN** may be added to this program with the command :
-``` bash
-# setcap cap_sys_admin=ep checksums
-```
 
 This command uses GNUlib to compute **MD5**, **SHA256** and **SHA512** checksums.
 These checksums are computed simultaneously using threads and CPU affinity.
