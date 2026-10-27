@@ -8,9 +8,9 @@ To compile **checksums** from the source files, type :
 $ make
 ```
 :warning:
-Accessing **trusted xattrs** requires **root** privileges. Do **not** set
-the SUID bit or grant **CAP_SYS_ADMIN** to the `checksums` binary. The current
-implementation does not enforce file access permission checks for the invoking user.
+> Accessing **trusted xattrs** requires **root** privileges. Do **not** set
+> the SUID bit or grant **CAP_SYS_ADMIN** to the `checksums` binary. The current
+> implementation does not enforce file access permission checks for the invoking user.
 
 
 This command uses GNUlib to compute **MD5**, **SHA256** and **SHA512** checksums.
