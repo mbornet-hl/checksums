@@ -7,7 +7,7 @@ To compile **checksums** from the source files, type :
 ``` bash
 $ make
 ```
-> ** :warning: SECURITY WARNING**
+> :warning: **SECURITY WARNING**
 >
 > Accessing **trusted xattrs** requires **root** privileges. Do **not** set
 > the SUID bit or grant **CAP_SYS_ADMIN** to the `checksums` binary. The current
